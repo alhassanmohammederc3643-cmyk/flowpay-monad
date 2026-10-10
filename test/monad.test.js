@@ -1,0 +1,12 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';
+import {generatePrivateKey,privateKeyToAccount} from 'viem/accounts';
+import {getNetwork} from '../src/networks.js';
+import {createFacilitator,paymentRequirements,createPaymentHeader} from '../src/index.js';
+import {decodeHeader} from '../src/eip3009.js';
+test('Monad registry excludes every mainnet',()=>{assert.equal(getNetwork('monad-testnet').chainId,10143);assert.equal(getNetwork('eip155:10143').testnet,true);for(const n of ['avalanche','eip155:143','base'])assert.throws(()=>getNetwork(n));});
+test('recipient, exact amount, expiry and signature guards',async()=>{let b=privateKeyToAccount(generatePrivateKey()),s=privateKeyToAccount(generatePrivateKey());let r=paymentRequirements({price:'0.001',payTo:s.address,resource:'http://test/paid'});let f=createFacilitator({rpcUrls:{'monad-testnet':'http://127.0.0.1:1'}});let p=decodeHeader(await createPaymentHeader(b,r));
+let q=structuredClone(p);q.payload.authorization.value='1001';assert.equal((await f.verify(q,r)).invalidReason,'amount_mismatch');
+q=structuredClone(p);q.payload.authorization.to=b.address;assert.equal((await f.verify(q,r)).invalidReason,'recipient_mismatch');
+q=structuredClone(p);q.payload.authorization.validBefore='1';assert.equal((await f.verify(q,r)).invalidReason,'authorization_expired');
+q=structuredClone(p);q.payload.authorization.nonce='0x'+'00'.repeat(32);assert.equal((await f.verify(q,r)).invalidReason,'invalid_signature');
+q=structuredClone(p);q.network='eip155:143';assert.equal((await f.verify(q,r)).invalidReason,'network_mismatch');});

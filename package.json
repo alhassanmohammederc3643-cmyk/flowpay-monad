@@ -1,0 +1,28 @@
+{
+  "name": "flowpay-monad",
+  "version": "0.1.0",
+  "description": "FlowPay x402 settlement route on Monad testnet only",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node --test test/*.test.js"
+  },
+  "keywords": [
+    "flowpay",
+    "monad",
+    "testnet",
+    "x402",
+    "usdc",
+    "eip-3009"
+  ],
+  "author": "Alhassan Mohammed",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.22.3",
+    "viem": "^2.56.8"
+  },
+  "devDependencies": {},
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  }
+}
